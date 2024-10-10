@@ -1,4 +1,4 @@
-Zadanie 1
+sZadanie 1
 Po użyciu polecenia zaimportowane zostały do przestrzeni roboczej do katalogu src pakiety pozwalające na obsługę robota tiago.
 
 Zadanie2 
@@ -81,7 +81,14 @@ arm_controller:command_start_arm_1_joint/position -> command_interfaces:command_
 state_interfaces:state_start_arm_1_joint/position -> arm_controller:state_end_arm_1_joint/position, joint_state_broadcaster:state_end_arm_1_joint/position
 
 
+Zadanie 10
+W celu poruszenia ramieniem robota stworzyliśmy program hello_moveit. Korzystaliśmy z grupy interfaceów arm_torso. Ustawiliśmy następującą pozycję zadaną: 
+msg.orientation.w = 1.0;
+  msg.position.x = 0.28;
+  msg.position.y = -0.2;
+  msg.position.z = 0.5;
 
+Ruch ramienia zaobserwowaliśmy w programie gazebo.
 
 
 
