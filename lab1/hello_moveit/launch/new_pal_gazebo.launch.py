@@ -84,7 +84,7 @@ def generate_launch_description():
     resource_path += pkg_path
 
     new_model_path = get_package_share_directory('hello_moveit')
-    new_model_path += os.path.join(new_model_path, 'models')
+    model_path += pathsep+ os.path.join(new_model_path, 'models')
 
 
 
