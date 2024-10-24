@@ -26,7 +26,7 @@ from launch_pal.robot_arguments import CommonArgs
 from launch_ros.actions import Node
 from tiago_description.launch_arguments import TiagoArgs
 from launch_pal.actions import CheckPublicSim
-
+pal_maps
 @dataclass(frozen=True)
 class LaunchArguments(LaunchArgumentsBase):
     base_type: DeclareLaunchArgument = TiagoArgs.base_type
@@ -73,8 +73,8 @@ def declare_actions(launch_description: LaunchDescription, launch_args: LaunchAr
 
     # Include Gazebo with custom world
     gazebo = include_scoped_launch_py_description(
-        pkg_name='pal_gazebo_worlds',
-        paths=['launch', 'pal_gazebo.launch.py'],
+        pkg_name='hello_moveit',
+        paths=['launch', 'new_pal_gazebo.launch.py'],
         env_vars=[gazebo_model_path_env_var],
         launch_arguments={
             "world_name": launch_args.world_name,
@@ -85,14 +85,15 @@ def declare_actions(launch_description: LaunchDescription, launch_args: LaunchAr
     launch_description.add_action(gazebo)
 
     navigation = include_scoped_launch_py_description(
-        pkg_name='tiago_2dnav',
-        paths=['launch', 'tiago_nav_bringup.launch.py'],
+        pkg_name='hello_moveit',
+        paths=['launch', 'new_tiago_nav_bringup.launch.py'],
         launch_arguments={
             "robot_name": robot_name,
             "is_public_sim": launch_args.is_public_sim,
             "laser": launch_args.laser_model,
             "base_type": launch_args.base_type,
             "world_name": launch_args.world_name,
+            'rviz_config': launch_args.rviz_config,
             'slam': launch_args.slam,
             'use_sim_time': LaunchConfiguration('use_sim_time'),
             "use_grasp_fix_plugin": launch_args.use_grasp_fix_plugin,
@@ -163,15 +164,6 @@ def declare_actions(launch_description: LaunchDescription, launch_args: LaunchAr
                     condition=IfCondition(LaunchConfiguration('tuck_arm')))
 
     launch_description.add_action(tuck_arm)
-
-    # Include RViz with custom configuration
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        output='screen',
-        arguments=['-d', LaunchConfiguration('rviz_config')]
-    )
-    launch_description.add_action(rviz)
 
     return
 
