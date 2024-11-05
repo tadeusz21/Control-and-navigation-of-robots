@@ -84,6 +84,12 @@ int main(int argc, char* argv[])
     RCLCPP_ERROR(logger, "Planning failed!");
   }
 
+  auto planning_frame = move_group_interface.getPlanningFrame();
+  auto end_effector_link = move_group_interface.getEndEffectorLink();
+
+  RCLCPP_INFO(logger, "układ bazowy (B): %s", planning_frame.c_str());
+  RCLCPP_INFO(logger, "układ końcówki (E): %s", end_effector_link.c_str());
+
   // Shutdown ROS
   rclcpp::shutdown();
   spinner.join();
