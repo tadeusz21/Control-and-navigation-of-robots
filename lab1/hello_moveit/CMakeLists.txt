@@ -48,6 +48,15 @@ ament_target_dependencies(one_grasp
 )
 install(TARGETS one_grasp DESTINATION lib/${PROJECT_NAME})
 
+add_executable(pick_and_place src/pick_and_place.cpp)
+ament_target_dependencies(one_grasp
+  "rclcpp"
+  "moveit_ros_planning_interface"
+  "moveit_visual_tools"
+  "gazebo_msgs"
+)
+install(TARGETS pick_and_place DESTINATION lib/${PROJECT_NAME})
+
 
 
 # Instalacja pliku wykonywalnego hello_moveit
