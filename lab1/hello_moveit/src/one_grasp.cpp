@@ -1,64 +1,3 @@
-// #include <moveit/move_group_interface/move_group_interface.h>
-// #include <moveit_visual_tools/moveit_visual_tools.h>
-
-// #include <memory>
-// #include <rclcpp/rclcpp.hpp>
-// #include <thread>
-// #include <gazebo_msgs/srv/get_entity_state.hpp>
-
-// // #include <gazebo_msgs/srv/GetEntityState.hpp>
-// int main(int argc, char* argv[])
-// {
-//   // Initialize ROS and create the Node
-//   rclcpp::init(argc, argv);
-//   auto const node = std::make_shared<rclcpp::Node>(
-//       "one_grasp", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
-
-//   // Create a ROS logger
-//   auto const logger = rclcpp::get_logger("one_grasp");
-
-//   // We spin up a SingleThreadedExecutor for the current state monitor to get
-//   // information about the robot's state.
-//   rclcpp::executors::SingleThreadedExecutor executor;
-//   executor.add_node(node);l_tools.h>
-//   auto spinner = std::thread([&executor]() { executor.spin(); });
-
-//   // Create the MoveIt MoveGroup Interface
-//   using moveit::planning_interface::MoveGroupInterface;
-//   auto move_group_interface = MoveGroupInterface(node, "arm_torso");
-
-//   // Construct and initialize MoveItVisualTools
-//   auto moveit_visual_tools =
-//       moveit_visual_tools::MoveItVisualTools{ node, "base_link", rviz_visual_tools::RVIZ_MARKER_TOPIC,
-//                                               move_group_interface.getRobotModel() };
-//   moveit_visual_tools.deleteAllMarkers();
-//   moveit_visual_tools.loadRemoteControl();
-
-//   // Create a closure for updating the text in rviz
-//   auto const draw_title = [&moveit_visual_tools](auto text) {
-//     auto const text_pose = [] {
-//       auto msg = Eigen::Isometry3d::Identity();
-//       msg.translation().z() = 1.0;  // Place text 1m above the base link
-//       return msg;
-//     }();
-//     moveit_visual_tools.publishText(text_pose, text, rviz_visual_tools::WHITE, rviz_visual_tools::XLARGE);
-//   };
-//   auto const prompt = [&moveit_visual_tools](auto text) { moveit_visual_tools.prompt(text); };
-//   auto const draw_trajectory_tool_path =
-//       [&moveit_visual_tools, jmg = move_group_interface.getRobotModel()->getJointModelGroup("arm_torso")](
-//           auto const trajectory) { moveit_visual_tools.publishTrajectoryLine(trajectory, jmg); };
-
-  
-//   // Service get_entity_state
-
-//   using namespace std::literals::chrono_literals;
-
-//   rclcpp::Client<gazebo_msgs::srv::GetEntityState>::SharedPtr client =
-//     node->create_client<gazebo_msgs::srv::GetEntityState>("/get_entity_state");
-
-
-
-
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
@@ -66,6 +5,7 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <gazebo_msgs/srv/get_entity_state.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+#include <moveit_msgs/msg/collision_object.hpp>
 
 geometry_msgs::msg::Pose toPoseMsg(const Eigen::Isometry3d& transform) {
     geometry_msgs::msg::Pose pose_msg;
@@ -134,6 +74,9 @@ int main(int argc, char* argv[])
   Eigen::Isometry3d T_BC = Eigen::Translation3d(0.6129532489572659, 0.12172421971793858, 0.33512117754742166) *
   Eigen::Quaterniond(-2.121740371074175e-05, -0.0003902260631371974, 0.014435026569939098, 0.999895733204901).normalized();
 
+  Eigen::Isometry3d T_BT = Eigen::Translation3d(0.696705, -0.052918, 0.15) *
+  Eigen::Quaterniond(0.0, 0.0, 0.0, -1.0).normalized();
+
   Eigen::Isometry3d T_GC = Eigen::Translation3d(-0.3, 0.0, 0.0) *
   Eigen::Quaterniond(0.0, 0.0, 0.0, 1.0).normalized();
 
@@ -153,38 +96,100 @@ int main(int argc, char* argv[])
   moveit_visual_tools.trigger();
 
 
+
 using moveit::planning_interface::MoveGroupInterface;
     MoveGroupInterface move_group_interface(node, "arm_torso"); 
 
   move_group_interface.setMaxVelocityScalingFactor(1.0); 
   move_group_interface.setMaxAccelerationScalingFactor(1.0);
-    
+  
+  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+
 
 
   auto move_group_interface_gripper = MoveGroupInterface(node, "gripper");
   // auto move_group_interface_arm = MoveGroupInterface(node, "arm");
-
-//  move_group_interface.setJointValueTarget(std::vector<double>({0.187, 100.0, 41.0, 0.0, 63.0, 0.0, 0.0, -78.0})); 
-//  moveit::planning_interface::MoveGroupInterface::Plan plan_0;
-//   auto const success_0 = static_cast<bool>(move_group_interface.plan(plan_0));
-
   // move_group_interface_arm.setMaxVelocityScalingFactor(1.0); 
   // move_group_interface_arm.setMaxAccelerationScalingFactor(1.0);
 
 
 
-//   if (success_0) {
-//   move_group_interface.execute(plan_0);
-// } else {
-//   RCLCPP_ERROR(logger, "Planning failed!");
-// }
+  auto table_collision_object = [frame_id =
+    move_group_interface.getPlanningFrame(), table_pos = T_BT] {
+        moveit_msgs::msg::CollisionObject collision_object;
+        collision_object.header.frame_id = frame_id;
+        collision_object.id = "table_collision_object";
+        shape_msgs::msg::SolidPrimitive primitive;
+
+        // Define the size of the box in meters
+        primitive.type = primitive.BOX;
+        primitive.dimensions.resize(3);
+        primitive.dimensions[primitive.BOX_X] = 0.5;
+        primitive.dimensions[primitive.BOX_Y] = 1.0;
+        primitive.dimensions[primitive.BOX_Z] = 0.3;
+
+        // Define the pose of the box (relative to the frame_id)
+        geometry_msgs::msg::Pose box_pose = tf2::toMsg(table_pos);
+
+        collision_object.primitives.push_back(primitive);
+        collision_object.primitive_poses.push_back(box_pose);
+        collision_object.operation = collision_object.ADD;
+
+        return collision_object;
+    }();
+
+
+
+auto cube_collision_object = [frame_id =
+    move_group_interface.getPlanningFrame(), cube_pos = T_BC] {
+        moveit_msgs::msg::CollisionObject collision_object;
+        collision_object.header.frame_id = frame_id;
+        collision_object.id = "green_cube_3_addedd";
+        shape_msgs::msg::SolidPrimitive primitive;
+
+        // Define the size of the box in meters
+        primitive.type = primitive.BOX;
+        primitive.dimensions.resize(3);
+        primitive.dimensions[primitive.BOX_X] = 0.07;
+        primitive.dimensions[primitive.BOX_Y] = 0.07;
+        primitive.dimensions[primitive.BOX_Z] = 0.07;
+
+        // Define the pose of the box (relative to the frame_id)
+        geometry_msgs::msg::Pose box_pose = tf2::toMsg(cube_pos);
+
+        collision_object.primitives.push_back(primitive);
+        collision_object.primitive_poses.push_back(box_pose);
+        collision_object.operation = collision_object.ADD;
+
+        return collision_object;
+    }();
+
+    std::vector<moveit_msgs::msg::CollisionObject> collision_objects;
+    collision_objects.push_back(table_collision_object);
+    collision_objects.push_back(cube_collision_object);
+
+     std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
+    planning_scene_interface.addCollisionObjects(collision_objects);
+  
+
+ move_group_interface.setJointValueTarget(std::vector<double>({0.187, 130.0/180.0*3.14, 41.0/180*3.14, 0.0, 63.0/180.0*3.14, 0.0, 0.0, -78.0/180.0*3.14})); 
+ moveit::planning_interface::MoveGroupInterface::Plan plan_0;
+  auto const success_0 = static_cast<bool>(move_group_interface.plan(plan_0));
+
+
+  if (success_0) {
+  move_group_interface.execute(plan_0);
+} else {
+  RCLCPP_ERROR(logger, "Planning failed!");
+}
 
 
   move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.05, 0.05}));
   moveit::planning_interface::MoveGroupInterface::Plan plan_grip_1;
   auto const success_grip_1 = static_cast<bool>(move_group_interface_gripper.plan(plan_grip_1));
 
-  
+  move_group_interface_gripper.setMaxVelocityScalingFactor(1.0); 
+  move_group_interface_gripper.setMaxAccelerationScalingFactor(1.0);
 
 
 
@@ -216,6 +221,9 @@ if (success) {
     RCLCPP_ERROR(logger, "Planning failed!");
 }
 
+std::vector<std::string> object_ids_to_remove = {"green_cube_3_addedd", "table_collision_object"};
+
+planning_scene_interface.removeCollisionObjects(object_ids_to_remove);
 
 
 geometry_msgs::msg::Pose grip_target_pose = toPoseMsg(end_effector_pose);
@@ -238,7 +246,7 @@ if (success_2) {
 }
 
 
-move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.033, 0.033}));
+move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.03, 0.03}));
   moveit::planning_interface::MoveGroupInterface::Plan plan_grip_2;
   auto const success_grip_2 = static_cast<bool>(move_group_interface_gripper.plan(plan_grip_2));
 
