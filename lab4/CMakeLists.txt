@@ -9,6 +9,25 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+# Dodaj plik źródłowy square_nav.cpp
+add_executable(square_nav src/square_nav.cpp)
+
+# Dodaj katalogi z nagłówkami
+target_include_directories(square_nav PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+# Wymagania dotyczące standardów C99 i C++17
+target_compile_features(square_nav PUBLIC c_std_99 cxx_std_17)
+
+# Połącz target z wymaganymi zależnościami
+ament_target_dependencies(square_nav rclcpp nav_msgs geometry_msgs)
+
+# Instalacja pliku wykonywalnego
+install(TARGETS square_nav
+  DESTINATION lib/${PROJECT_NAME})
 
 # Dodaj plik źródłowy test_nav.cpp
 add_executable(test_nav src/test_nav.cpp)
@@ -25,7 +44,7 @@ target_compile_features(test_nav PUBLIC c_std_99 cxx_std_17)
 ament_target_dependencies(test_nav rclcpp nav_msgs)
 
 # Instalacja pliku wykonywalnego
-install(TARGETS test_nav
+install(TARGETS square_nav test_nav
   DESTINATION lib/${PROJECT_NAME})
 
 # Dodaj obsługę testów i linterów
