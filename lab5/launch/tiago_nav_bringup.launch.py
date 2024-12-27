@@ -59,7 +59,8 @@ def public_nav_function(context, *args, **kwargs):
     world_name = read_launch_argument("world_name", context)
     actions = []
     tiago_2dnav = get_package_share_directory("tiago_2dnav")
-    param_file = os.path.join(tiago_2dnav, "params", "tiago_" + base_type + "_nav_public_sim.yaml")
+    lab5 = get_package_share_directory("lab5")
+    param_file = os.path.join(lab5, "params", "tiago_" + base_type + "_nav_public_sim.yaml")
 
     pal_maps = get_package_share_directory("lab5")
 
