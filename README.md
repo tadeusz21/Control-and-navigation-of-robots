@@ -3,4 +3,6 @@ Skład zespołu:
     Michał Pióro
 
 
-[Sprawozdanie Laboratorium 4](lab_4_STERO_24Z_Chmielik_Pioro.pdf)
+[Sprawozdanie Laboratorium 4 i Projekt 1](lab_4_STERO_24Z_Chmielik_Pioro.pdf)
+
+[Sprawozdanie Laboratorium 5](lab_5_STERO_24Z_Chmielik_Pioro.pdf)
