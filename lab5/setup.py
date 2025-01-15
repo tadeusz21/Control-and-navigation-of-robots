@@ -27,7 +27,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simple_nav = lab5.simple_nav:main'
+            'simple_nav = lab5.simple_nav:main',
+            'waypoint_nav = lab5.waypoint_nav:main',
+            'waypoint_nav_client = lab5.waypoint_nav_client:main',
+            'follow_waypoint_nav_client = lab5.follow_waypoint_nav_client:main',
+            'follow_waypoint_nav_server = lab5.follow_waypoint_nav_server:main'
         ],
     },
 )
