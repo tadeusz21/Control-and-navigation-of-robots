@@ -1,10 +1,7 @@
-Skład zespołu:
-    Tadeusz Chmielik
-    Michał Pióro
+ROS 2 Packages developed for PAL Tiago robot. This repository includes packages created for the Robot Simulation and Control course at the Faculty of Electronics and Information Technology, Warsaw University of Technology.  
+
+The course was divided into two main sections:  
+- **Manipulation** (C++, MoveIt)  
+- **Navigation** (Python, Nav2)  
 
 
-[Sprawozdanie Laboratorium 4 i Projekt 1](lab_4_STERO_24Z_Chmielik_Pioro.pdf)
-
-[Sprawozdanie Laboratorium 5 i Projekt 2](lab5_STERO_24Z_Chmielik_Pioro.pdf)
-
-[Sprawozdanie Laboratorium 6](lab6_STERO_24Z_Chmielik_Pioro.pdf)
